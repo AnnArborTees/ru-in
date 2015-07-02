@@ -27,6 +27,9 @@ android {
 dependencies {
     compile 'com.android.support:support-v4:22.2.0'
     compile 'com.android.support:appcompat-v7:19.1.0'
+    compile('ch.acra:acra:4.6.2') {
+        exclude module: 'json'
+    }
 
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
     androidTestCompile 'com.android.support.test:runner:0.3'
