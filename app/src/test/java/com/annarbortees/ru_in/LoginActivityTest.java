@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
  * Created by nigel on 7/2/15.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = "src/main/AndroidManifest.xml", sdk = 19)
+@Config(manifest = "src/main/AndroidManifest.xml", emulateSdk = 18)
 public class LoginActivityTest {
     private ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class);
     private LoginActivity activity;
