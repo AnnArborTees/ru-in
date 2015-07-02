@@ -10,6 +10,7 @@ android {
         targetSdkVersion 18
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -17,17 +18,26 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        exclude 'LICENSE.txt'
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.android.gms:play-services:7.5.0'
+    compile 'com.android.support:support-v4:22.2.0'
     compile 'com.android.support:appcompat-v7:19.1.0'
+
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
+    androidTestCompile 'com.android.support.test:runner:0.3'
+    androidTestCompile 'com.android.support.test:rules:0.3'
+
     testCompile 'com.android.support:appcompat-v7:19.1.0'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
+    testCompile 'org.apache.maven:maven-ant-tasks:2.1.3'
     testCompile('org.robolectric:robolectric:2.4') {
         exclude module: 'commons-logging'
         exclude module: 'httpclient'
     }
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.hamcrest:hamcrest-library:1.3'
 }
