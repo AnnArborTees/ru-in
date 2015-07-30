@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,8 +27,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.annarbortees.ru_in.com.annarbortees.ru_in.server.User;
+
+import org.acra.ACRA;
+import org.acra.sender.HttpSender;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 /**
@@ -50,6 +60,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
+    private EditText mPasswordConfirmationView;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -63,12 +74,39 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
+        mPasswordConfirmationView = (EditText) findViewById(R.id.password_confirmation);
+        mPasswordConfirmationView.setVisibility(View.GONE);
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                // TODO equivalent statement for retrofit callback?
+                if (mAuthTask != null) return;
+
+                mEmailView.setError(null);
+                mPasswordView.setError(null);
+                mPasswordConfirmationView.setVisibility(View.GONE);
+                // register(mEmailView.getText().toString(), mPasswordView.getText().toString());
+                // attemptLogin();
+            }
+        });
+
+        Button mEmailRegisterButton = (Button) findViewById(R.id.email_register);
+        mEmailRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEmailView.setError(null);
+                mPasswordView.setError(null);
+                if (mPasswordConfirmationView.getVisibility() != View.VISIBLE)
+                    mPasswordConfirmationView.setVisibility(View.VISIBLE);
+                else {
+                    register(
+                        mEmailView.getText().toString(),
+                        mPasswordView.getText().toString(),
+                        mPasswordConfirmationView.getText().toString()
+                    );
+                }
             }
         });
 
@@ -80,6 +118,29 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         getLoaderManager().initLoader(0, null, this);
     }
 
+    public void register(String email, String password, String passwordConfirmation) {
+        RuInApplication app = (RuInApplication)getApplication();
+
+        try {
+            app.server.users.register(email, password, passwordConfirmation, new Callback<User>() {
+                @Override
+                public void success(User user, Response response) {
+                    mEmailView.setError("Helllllllllllllllll yeahhhhhhhhhhhhh "+user.email);
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    // TODO that errors gets null fields?
+                    mEmailView.setError("Problem. " + ((User)error.getBody()).errors.password[0]);
+                    Log.e("Registration", error.getBody().toString());
+                }
+            });
+        }
+        catch(Exception e) {
+            ACRA.getErrorReporter().handleSilentException(e);
+            Log.e("Registration", e.toString());
+        }
+    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -134,13 +195,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 8;
     }
 
     /**
@@ -255,6 +314,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 // Simulate network access.
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
+                ACRA.getErrorReporter().handleSilentException(e);
                 return false;
             }
 

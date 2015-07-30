@@ -8,6 +8,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
+import retrofit.RestAdapter;
+import retrofit.http.GET;
+
 import static org.junit.Assert.*;
 
 /**
@@ -20,12 +23,18 @@ public class LoginActivityTest {
     private LoginActivity activity;
 
     @Before
-    public void testsWork() {
+    public void grabActivity() {
         activity = controller.attach().create().get();
     }
 
     @Test
-    public void shouldBeTrue() {
+    public void trueShouldBeTrue() {
         assertTrue(true);
+    }
+
+    @Test
+    public void registerShouldSendARequestToTheServer() {
+        // TODO
+        Robolectric.addPendingHttpResponse(200, "{ \"email\": \"test@test.com\" }");
     }
 }
