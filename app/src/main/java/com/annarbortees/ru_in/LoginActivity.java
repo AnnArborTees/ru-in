@@ -130,9 +130,18 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
                 @Override
                 public void failure(RetrofitError error) {
-                    // TODO that errors gets null fields?
-                    mEmailView.setError("Problem. " + ((User)error.getBody()).errors.password[0]);
-                    Log.e("Registration", error.getBody().toString());
+                    User user = (User)error.getBody();
+                    if (user.errors.email.length > 0)
+                        mEmailView.setError("Email " + TextUtils.join(", ", user.errors.email));
+                    if (user.errors.password.length > 0)
+                        mPasswordView.setError(
+                            "Password " + TextUtils.join(", ", user.errors.password)
+                        );
+                    if (user.errors.passwordConfirmation.length > 0)
+                        mPasswordConfirmationView.setError(
+                            "Confirmation " +
+                                    TextUtils.join(", ", user.errors.passwordConfirmation)
+                        );
                 }
             });
         }

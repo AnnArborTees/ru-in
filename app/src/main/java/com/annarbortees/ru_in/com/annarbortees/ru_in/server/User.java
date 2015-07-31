@@ -28,12 +28,39 @@ public class User {
         public final String[] firstName;
         public final String[] lastName;
         public final String[] password;
+        public final String[] passwordConfirmation;
 
-        public Errors(String[] email, String[] firstName, String[] lastName, String[] password) {
-            this.email     = email;
-            this.firstName = firstName;
-            this.lastName  = lastName;
-            this.password  = password;
+        public Errors(
+                String[] email,
+                String[] firstName,
+                String[] lastName,
+                String[] password,
+                String[] passwordConfirmation
+        ) {
+            if (email == null)
+                this.email = new String[0];
+            else
+                this.email = email;
+
+            if (firstName == null)
+                this.firstName = new String[0];
+            else
+                this.firstName = firstName;
+
+            if (lastName == null)
+                this.lastName = new String[0];
+            else
+                this.lastName = lastName;
+
+            if (password == null)
+                this.password = new String[0];
+            else
+                this.password  = password;
+
+            if (passwordConfirmation == null)
+                this.passwordConfirmation = new String[0];
+            else
+                this.passwordConfirmation = passwordConfirmation;
         }
     }
 
