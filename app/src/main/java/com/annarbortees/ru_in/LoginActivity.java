@@ -25,6 +25,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.annarbortees.ru_in.com.annarbortees.ru_in.server.User;
@@ -61,8 +63,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private EditText mPasswordConfirmationView;
-    private View mProgressView;
     private View mLoginFormView;
+    private ProgressBar mLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +77,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordConfirmationView = (EditText) findViewById(R.id.password_confirmation);
+
+        mLoading = (ProgressBar) findViewById(R.id.progress_circular);
+        mLoading.setVisibility(View.GONE);
+
         mPasswordConfirmationView.setVisibility(View.GONE);
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in);
@@ -101,17 +107,19 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 if (mPasswordConfirmationView.getVisibility() != View.VISIBLE)
                     mPasswordConfirmationView.setVisibility(View.VISIBLE);
                 else {
+                    mLoginFormView.setVisibility(View.GONE);
+                    mLoading.setVisibility(View.VISIBLE);
+
                     register(
-                        mEmailView.getText().toString(),
-                        mPasswordView.getText().toString(),
-                        mPasswordConfirmationView.getText().toString()
+                            mEmailView.getText().toString(),
+                            mPasswordView.getText().toString(),
+                            mPasswordConfirmationView.getText().toString()
                     );
                 }
             }
         });
 
         mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
     }
 
     private void populateAutoComplete() {
@@ -125,23 +133,32 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             app.server.users.register(email, password, passwordConfirmation, new Callback<User>() {
                 @Override
                 public void success(User user, Response response) {
+                    // TODO switch activities???
                     mEmailView.setError("Helllllllllllllllll yeahhhhhhhhhhhhh "+user.email);
+
+                    mLoading.setVisibility(View.GONE);
+                    mLoginFormView.setVisibility(View.VISIBLE);
                 }
 
                 @Override
                 public void failure(RetrofitError error) {
                     User user = (User)error.getBody();
-                    if (user.errors.email.length > 0)
+                    User.Errors errors = user.errors;
+                    if (errors.email != null && errors.email.length > 0)
                         mEmailView.setError("Email " + TextUtils.join(", ", user.errors.email));
-                    if (user.errors.password.length > 0)
+                    if (errors.password != null && errors.password.length > 0)
                         mPasswordView.setError(
                             "Password " + TextUtils.join(", ", user.errors.password)
                         );
-                    if (user.errors.passwordConfirmation.length > 0)
+                    if (errors.passwordConfirmation != null &&
+                            errors.passwordConfirmation.length > 0)
                         mPasswordConfirmationView.setError(
                             "Confirmation " +
                                     TextUtils.join(", ", user.errors.passwordConfirmation)
                         );
+
+                    mLoading.setVisibility(View.GONE);
+                    mLoginFormView.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -231,18 +248,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 }
             });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
         } else {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
