@@ -12,6 +12,8 @@ import org.acra.annotation.ReportsCrashes;
  */
 @ReportsCrashes(logcatArguments = {"-t", "250", "-v", "time"})
 public class RuInApplication extends Application {
+    public static String PREFERENCES_NAME = "RU_IN";
+
     public Server server;
 
     @Override

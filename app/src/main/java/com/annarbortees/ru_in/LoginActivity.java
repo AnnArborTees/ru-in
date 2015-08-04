@@ -8,6 +8,7 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -64,7 +65,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private EditText mPasswordView;
     private EditText mPasswordConfirmationView;
     private View mLoginFormView;
+    private TextView mInfoText;
     private ProgressBar mLoading;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,19 +80,20 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordConfirmationView = (EditText) findViewById(R.id.password_confirmation);
+        mInfoText = (TextView) findViewById(R.id.info_text);
+        mInfoText.setVisibility(View.GONE);
 
         mLoading = (ProgressBar) findViewById(R.id.progress_circular);
         mLoading.setVisibility(View.GONE);
 
         mPasswordConfirmationView.setVisibility(View.GONE);
 
+        prefs = getSharedPreferences(RuInApplication.PREFERENCES_NAME, 0);
+
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO equivalent statement for retrofit callback?
-                if (mAuthTask != null) return;
-
                 mEmailView.setError(null);
                 mPasswordView.setError(null);
                 mPasswordConfirmationView.setVisibility(View.GONE);
@@ -107,8 +111,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 if (mPasswordConfirmationView.getVisibility() != View.VISIBLE)
                     mPasswordConfirmationView.setVisibility(View.VISIBLE);
                 else {
-                    mLoginFormView.setVisibility(View.GONE);
-                    mLoading.setVisibility(View.VISIBLE);
+                    startLoading();
 
                     register(
                             mEmailView.getText().toString(),
@@ -133,11 +136,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             app.server.users.register(email, password, passwordConfirmation, new Callback<User>() {
                 @Override
                 public void success(User user, Response response) {
-                    // TODO switch activities???
-                    mEmailView.setError("Helllllllllllllllll yeahhhhhhhhhhhhh "+user.email);
+                    prefs.edit()
+                            .putString("authenticationToken", user.authenticationToken)
+                            .putString("email", user.email)
+                            .apply();
 
-                    mLoading.setVisibility(View.GONE);
-                    mLoginFormView.setVisibility(View.VISIBLE);
+                    stopLoading();
                 }
 
                 @Override
@@ -157,8 +161,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                                     TextUtils.join(", ", user.errors.passwordConfirmation)
                         );
 
-                    mLoading.setVisibility(View.GONE);
-                    mLoginFormView.setVisibility(View.VISIBLE);
+                    stopLoading();
                 }
             });
         }
@@ -168,7 +171,32 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
+    public void login(String email, String password) {
+        try {
+            // TODO
+        }
+        catch(Exception e) {
+            ACRA.getErrorReporter().handleSilentException(e);
+            Log.e("Registration", e.toString());
+        }
+    }
+
+    public void stopLoading() {
+        mLoading.setVisibility(View.GONE);
+        mLoginFormView.setVisibility(View.VISIBLE);
+    }
+    public void startLoading() {
+        mLoginFormView.setVisibility(View.GONE);
+        mLoading.setVisibility(View.VISIBLE);
+    }
+
+    public void info(String text) {
+        mInfoText.setVisibility(View.VISIBLE);
+        mInfoText.setText(text);
+    }
+
     /**
+     * NOTE not used - this was generated
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.

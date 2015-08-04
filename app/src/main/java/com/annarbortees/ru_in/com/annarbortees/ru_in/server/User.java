@@ -21,6 +21,15 @@ public class User {
             @Field("user[password_confirmation]") String pass_conf,
             Callback<User> cb
         );
+
+        @FormUrlEncoded
+        @POST("/users/")
+        void login(
+            @Field("user[email]") String email,
+            // TODO I don't think this is how devise works; we'll have to make our own action
+            @Field("user[password]") String pass,
+            Callback<User> cb
+        ); // This should give us the user's token, which we should store in the shared properties
     }
 
     public class Errors {
@@ -55,7 +64,7 @@ public class User {
             if (password == null)
                 this.password = new String[0];
             else
-                this.password  = password;
+                this.password = password;
 
             if (passwordConfirmation == null)
                 this.passwordConfirmation = new String[0];
@@ -67,12 +76,20 @@ public class User {
     public final String email;
     public final String firstName;
     public final String lastName;
+    public final String authenticationToken;
     public final Errors errors;
 
-    public User(String email, String firstName, String lastName, Errors errors) {
-        this.email     = email;
-        this.firstName = firstName;
-        this.lastName  = lastName;
-        this.errors    = errors;
+    public User(
+        String email,
+        String firstName,
+        String lastName,
+        String authenticationToken,
+        Errors errors
+    ) {
+        this.email               = email;
+        this.firstName           = firstName;
+        this.lastName            = lastName;
+        this.authenticationToken = authenticationToken;
+        this.errors              = errors;
     }
 }
