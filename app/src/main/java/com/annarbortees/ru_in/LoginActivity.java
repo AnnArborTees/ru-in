@@ -113,7 +113,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 else {
                     startLoading();
 
-                    register(
+                    registerUser(
                             mEmailView.getText().toString(),
                             mPasswordView.getText().toString(),
                             mPasswordConfirmationView.getText().toString()
@@ -129,13 +129,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         getLoaderManager().initLoader(0, null, this);
     }
 
-    public void register(String email, String password, String passwordConfirmation) {
+    public void registerUser(String email, String password, String passwordConfirmation) {
         RuInApplication app = (RuInApplication)getApplication();
 
         try {
             app.server.users.register(email, password, passwordConfirmation, new Callback<User>() {
                 @Override
                 public void success(User user, Response response) {
+                    Log.i("registerUser", "Successfully registered!");
+
                     prefs.edit()
                             .putString("authenticationToken", user.authenticationToken)
                             .putString("email", user.email)
@@ -146,32 +148,39 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
                 @Override
                 public void failure(RetrofitError error) {
-                    User user = (User)error.getBody();
-                    User.Errors errors = user.errors;
-                    if (errors.email != null && errors.email.length > 0)
-                        mEmailView.setError("Email " + TextUtils.join(", ", user.errors.email));
-                    if (errors.password != null && errors.password.length > 0)
-                        mPasswordView.setError(
-                            "Password " + TextUtils.join(", ", user.errors.password)
-                        );
-                    if (errors.passwordConfirmation != null &&
-                            errors.passwordConfirmation.length > 0)
-                        mPasswordConfirmationView.setError(
-                            "Confirmation " +
-                                    TextUtils.join(", ", user.errors.passwordConfirmation)
-                        );
+                    User user = (User) error.getBody();
+                    // TODO check for status codes like 500
+                    if (user == null) {
+                        Log.e("registerUser", error.getMessage());
+
+                        info(error.getMessage());
+                    }
+                    else {
+                        User.Errors errors = user.errors;
+                        if (errors.email != null && errors.email.length > 0)
+                            mEmailView.setError("Email " + TextUtils.join(", ", user.errors.email));
+                        if (errors.password != null && errors.password.length > 0)
+                            mPasswordView.setError(
+                                    "Password " + TextUtils.join(", ", user.errors.password)
+                            );
+                        if (errors.passwordConfirmation != null &&
+                                errors.passwordConfirmation.length > 0)
+                            mPasswordConfirmationView.setError(
+                                    "Confirmation " +
+                                            TextUtils.join(", ", user.errors.passwordConfirmation)
+                            );
+                    }
 
                     stopLoading();
                 }
             });
         }
-        catch(Exception e) {
-            ACRA.getErrorReporter().handleSilentException(e);
-            Log.e("Registration", e.toString());
+        catch (Exception e) {
+            Log.e("registerUser", "Aaaand we have an error: " + e.toString());
         }
     }
 
-    public void login(String email, String password) {
+    public void loginUser(String email, String password) {
         try {
             // TODO
         }

@@ -39,10 +39,10 @@ public class LoginActivityTest {
     @Before
     public void setRestAdapter() {
         RuInApplication app = (RuInApplication)activity.getApplication();
-        Executor exec = Executors.newSingleThreadExecutor();
+        // Executor exec = Executors.newSingleThreadExecutor();
         app.server.restAdapter = new RestAdapter.Builder()
             .setClient(new UrlConnectionClient())
-            .setExecutors(exec, exec)
+            // .setExecutors(exec, exec)
             .setEndpoint(Server.ENDPOINT)
             .setConverter(new GsonConverter(app.server.gson))
             .build();
@@ -54,13 +54,15 @@ public class LoginActivityTest {
     }
 
     @Test
-    public void registerShouldAddTokenAndEmailToSharedPreferencesOnSuccess() {
+    // TODO this is completely nonfunctional
+    public void registerUserShouldAddTokenAndEmailToSharedPreferencesOnSuccess() {
         Robolectric.addPendingHttpResponse(
-            200, "{ \"email\": \"test@test.com\", \"authenticationToken\": \"abc123\" }"
+                200, "{ \"email\": \"test@test.com\", \"authenticationToken\": \"abc123\" }"
         );
-        activity.register("test@test.com", "inComingNewUs3r", "inComingNewUs3r");
+        activity.registerUser("test@test.com", "inComingNewUs3r", "inComingNewUs3r");
+        try { Thread.sleep(500); } catch(InterruptedException e) {  }
         SharedPreferences prefs = activity.getSharedPreferences(RuInApplication.PREFERENCES_NAME, 0);
-        assertEquals(prefs.getString("email", "NULL"), "test@test.com");
-        assertEquals(prefs.getString("authenticationToken", "NULL"), "abc123");
+        assertEquals("test@test.com", prefs.getString("email", "NULL"));
+        assertEquals("abc123", prefs.getString("authenticationToken", "NULL"));
     }
 }

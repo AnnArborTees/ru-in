@@ -23,7 +23,7 @@ public class User {
         );
 
         @FormUrlEncoded
-        @POST("/users/")
+        @POST("/users")
         void login(
             @Field("user[email]") String email,
             // TODO I don't think this is how devise works; we'll have to make our own action
