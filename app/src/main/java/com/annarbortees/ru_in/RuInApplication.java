@@ -18,6 +18,7 @@ public class RuInApplication extends Application {
 
     @Override
     public void onCreate() {
+        super.onCreate();
         ACRA.init(this);
         // ACRA.getErrorReporter().setReportSender(new HockeySender());
 

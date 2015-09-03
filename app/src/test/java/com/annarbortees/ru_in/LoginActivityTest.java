@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 
 import com.annarbortees.ru_in.RuInApplication;
 import com.annarbortees.ru_in.com.annarbortees.ru_in.server.Server;
+import com.annarbortees.ru_in.com.annarbortees.ru_in.server.User;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,17 +37,6 @@ public class LoginActivityTest {
     public void grabActivity() {
         activity = controller.attach().create().get();
     }
-    @Before
-    public void setRestAdapter() {
-        RuInApplication app = (RuInApplication)activity.getApplication();
-        // Executor exec = Executors.newSingleThreadExecutor();
-        app.server.restAdapter = new RestAdapter.Builder()
-            .setClient(new UrlConnectionClient())
-            // .setExecutors(exec, exec)
-            .setEndpoint(Server.ENDPOINT)
-            .setConverter(new GsonConverter(app.server.gson))
-            .build();
-    }
 
     @Test
     public void trueShouldBeTrue() {
@@ -61,6 +51,7 @@ public class LoginActivityTest {
         );
         activity.registerUser("test@test.com", "inComingNewUs3r", "inComingNewUs3r");
         try { Thread.sleep(500); } catch(InterruptedException e) {  }
+        assertTrue(Robolectric.httpRequestWasMade(Server.endpoint));
         SharedPreferences prefs = activity.getSharedPreferences(RuInApplication.PREFERENCES_NAME, 0);
         assertEquals("test@test.com", prefs.getString("email", "NULL"));
         assertEquals("abc123", prefs.getString("authenticationToken", "NULL"));
